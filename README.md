@@ -1,9 +1,13 @@
+此项目主要来源于 [unitree_mujoco](https://github.com/unitreerobotics/unitree_mujoco)。在此基础上添加以下功能：
+
+- ✅ 添加键盘控制方式发遥控器指令（simulate_python/unitree_sdk2py_bridge.py 的 223-291 行）
+- ✅ 添加motion参数，支持进行高层运动控制（simulate_python/motion 目录的代码）
+- 添加audio参数，支持PlayStream接口调用
+
 
 # 介绍
 ## Unitree mujoco
-`unitree_mujoco` 是基于 `Unitree sdk2` 和 `mujoco` 开发的仿真器。用户使用 `Unitree_sdk2`、 `unitree_ros2` 和 `unitree_sdk2_python` 开发的控制程序可以方便地接入该仿真器，实现仿真到实物的开发流程。仓库别基于 c++ 和 python 实现了两个版本的仿真器， 其结构大致如下图所示:
-
-![](./doc/func.png)
+`unitree_mujoco` 是基于 `Unitree sdk2` 和 `mujoco` 开发的仿真器。用户使用 `Unitree_sdk2`、 `unitree_ros2` 和 `unitree_sdk2_python` 开发的控制程序可以方便地接入该仿真器，实现仿真到实物的开发流程。
 
 ## 目录结构
 - `simulate`: 基于 unitree_sdk2 和 mujoco (c++) 实现的仿真器（推荐）
@@ -241,7 +245,6 @@ if js_type == "xbox":
 
 ## 2. 地形生成工具
 我们提供了一个在 mujoco 仿真器中参数化创建简单地形的工具，支持添加楼梯、杂乱地面、高程图等地形。程序位于 `terrain_tool` 文件夹中。具体的使用方法见 `terrain_tool` 文件夹下的 readme 文件。
-![](./doc/terrain.png)
 
 ## 3. sim to real
 `example` 文件夹下提供了使用不同接口实现 Go2 机器人站起再趴下的简单例子。这些例子简演示了如何使用 Unitree 提供的接口实现仿真到实物的实现。下面是每个文件夹名称的解释：

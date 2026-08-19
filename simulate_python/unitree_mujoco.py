@@ -3,9 +3,14 @@ import mujoco
 import mujoco.viewer
 from threading import Thread
 import threading
+import argparse
+import os
+import yaml
 
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from unitree_sdk2py_bridge import UnitreeSdk2Bridge, ElasticBand
+
+from motion.motion import MotionController, MoveController
 
 import config
 
@@ -38,11 +43,12 @@ time.sleep(0.2)
 def SimulationThread():
     global mj_data, mj_model
 
-    ChannelFactoryInitialize(config.DOMAIN_ID, config.INTERFACE)
     unitree = UnitreeSdk2Bridge(mj_model, mj_data)
 
     if config.USE_JOYSTICK:
         unitree.SetupJoystick(device_id=0, js_type=config.JOYSTICK_TYPE)
+    if config.USE_KEYBOARD:
+        unitree.keyboard = True
     if config.PRINT_SCENE_INFORMATION:
         unitree.PrintSceneInformation()
 
@@ -74,8 +80,54 @@ def PhysicsViewerThread():
         locker.release()
         time.sleep(config.VIEWER_DT)
 
+def MotionThread():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    config_file = os.path.join(current_dir, "motion", "config.yaml")
+    with open(config_file, 'r') as f:
+        print(f"Loading config from {config_file}")
+        cfg = yaml.safe_load(f)
+    
+    motion_controller = MotionController(cfg)
+    
+    if cfg.get("input_mode") == "api":
+        move_controller = MoveController(motion_controller)
+    
+    while viewer.is_running():
+        loop_start_time = time.time()
+        
+        motion_controller.step()
+        
+        elapsed = time.time() - loop_start_time
+        sleep_time = motion_controller.dt - elapsed
+        if sleep_time > 0:
+            time.sleep(sleep_time)
+        else:
+            print(f"Warning: Loop is running behind by {-sleep_time:.3f} seconds.")
+    
+    motion_controller.stop()
+
+
+def AudioThread():
+    pass  # Placeholder for audio thread implementation
+
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--motion', action='store_true', help='Enable motion control mode')
+    parser.add_argument('--audio', action='store_true', help='Enable audio')
+    args = parser.parse_args()
+    print(f'args: {args}')
+    
+    # Initialize DDS before starting any threads that use it
+    ChannelFactoryInitialize(config.DOMAIN_ID, config.INTERFACE)
+    
+    if args.motion:
+        motion_thread = Thread(target=MotionThread)
+        motion_thread.start()
+    if args.audio:
+        audio_thread = Thread(target=AudioThread)
+        audio_thread.start()
+
     viewer_thread = Thread(target=PhysicsViewerThread)
     sim_thread = Thread(target=SimulationThread)
 

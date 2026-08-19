@@ -13,7 +13,7 @@ from unitree_sdk2py.idl.default import unitree_go_msg_dds__WirelessController_
 from unitree_sdk2py.utils.thread import RecurrentThread
 
 import config
-if config.ROBOT=="g1":
+if config.ROBOT in ["g1", "r1", "h1", "h1_2", "h2"]:
     from unitree_sdk2py.idl.unitree_hg.msg.dds_ import LowCmd_
     from unitree_sdk2py.idl.unitree_hg.msg.dds_ import LowState_
     from unitree_sdk2py.idl.default import unitree_hg_msg_dds__LowState_ as LowState_default
@@ -45,6 +45,7 @@ class UnitreeSdk2Bridge:
         self.idl_type = (self.num_motor > NUM_MOTOR_IDL_GO) # 0: unitree_go, 1: unitree_hg
 
         self.joystick = None
+        self.keyboard = None
 
         # Check sensor
         for i in range(self.dim_motor_sensor, self.mj_model.nsensor):
@@ -214,6 +215,75 @@ class UnitreeSdk2Bridge:
                     -self.joystick.get_axis(self.axis_id["RY"]),
                     -self.joystick.get_axis(self.axis_id["LY"]),
                 ]
+                packs = list(map(lambda x: struct.pack("f", x), sticks))
+                self.low_state.wireless_remote[4:8] = packs[0]
+                self.low_state.wireless_remote[8:12] = packs[1]
+                self.low_state.wireless_remote[12:16] = packs[2]
+                self.low_state.wireless_remote[20:24] = packs[3]
+            elif self.keyboard != None:
+                # 若不使用游戏手柄控制，则切换到键盘控制
+                from pynput import keyboard
+                from pynput.keyboard import Key
+                
+                if not hasattr(self, '_keys_pressed'):
+                    self._keys_pressed = set()
+                    def on_press(key):
+                        # print(f"Key pressed: {key}")
+                        if hasattr(key, 'char') and key.char:
+                            self._keys_pressed.add(key.char.lower())
+                        else:
+                            self._keys_pressed.add(key)
+                    def on_release(key):
+                        # print(f"Key released: {key}")
+                        if hasattr(key, 'char') and key.char:
+                            self._keys_pressed.discard(key.char.lower())
+                        else:
+                            self._keys_pressed.discard(key)
+                    
+                    listener = keyboard.Listener(on_press=on_press, on_release=on_release)
+                    listener.start()
+                
+                self.low_state.wireless_remote[2] = int(
+                    "".join(
+                        [
+                            f"{key}"
+                            for key in [
+                                int('z' in self._keys_pressed),
+                                int('x' in self._keys_pressed),
+                                int(Key.f6 in self._keys_pressed),
+                                int(Key.f8 in self._keys_pressed),
+                                int(Key.space in self._keys_pressed),
+                                int(Key.enter in self._keys_pressed),
+                                int(Key.f5 in self._keys_pressed),
+                                int(Key.f7 in self._keys_pressed),
+                            ]
+                        ]
+                    ),
+                    2,
+                )
+                self.low_state.wireless_remote[3] = int(
+                    "".join(
+                        [
+                            f"{key}"
+                            for key in [
+                                int(Key.left in self._keys_pressed),
+                                int(Key.down in self._keys_pressed),
+                                int(Key.right in self._keys_pressed),
+                                int(Key.up in self._keys_pressed),
+                                int('y' in self._keys_pressed),
+                                int('t' in self._keys_pressed),
+                                int('h' in self._keys_pressed),
+                                int('g' in self._keys_pressed),
+                            ]
+                        ]
+                    ),
+                    2,
+                )
+                lx = float(('d' in self._keys_pressed) - ('a' in self._keys_pressed))
+                ly = float(('w' in self._keys_pressed) - ('s' in self._keys_pressed))
+                rx = float(('l' in self._keys_pressed) - ('j' in self._keys_pressed))
+                ry = float(('i' in self._keys_pressed) - ('k' in self._keys_pressed))
+                sticks = [lx, rx, ry, ly]
                 packs = list(map(lambda x: struct.pack("f", x), sticks))
                 self.low_state.wireless_remote[4:8] = packs[0]
                 self.low_state.wireless_remote[8:12] = packs[1]
