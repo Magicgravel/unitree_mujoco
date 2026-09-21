@@ -4,6 +4,29 @@
 - ✅ 添加motion参数，支持进行高层运动控制（simulate_python/motion 目录的代码）
 - 添加audio参数，支持PlayStream接口调用
 
+**键位映射表**
+
+| R3遥控器键位 | 键盘键位 |
+| --- | --- |
+| 左摇杆 | w s a d |
+| 右摇杆 | i k j l |
+| L1 | F5 |
+| L2 | F6 |
+| R1 | F7 |
+| R2 | F8 |
+| A | g |
+| B | h |
+| X | t |
+| Y | y |
+| UP | ↑  |
+| RIGHT | → |
+| DOWN | ↓ |
+| LEFT | ← |
+| START | Enter |
+| SELECT | Space |
+| F1 | z |
+| F3 | x |
+
 
 # 介绍
 ## Unitree mujoco

@@ -16,12 +16,12 @@ from fsm.fsm import FSM
 from states import *
 
 from common.ctrlcomp import StateAndCmd, PolicyOutput
-# from common.teleop_keyboard import TeleopKeyboard
-# from common.teleop_gamepad import TeleopGamepad
 # from common.audio_player import AudioPlayer
 
 from unitree_sdk2py.core.channel import ChannelPublisher, ChannelSubscriber, ChannelFactoryInitialize
 from unitree_sdk2py.idl.unitree_api.msg.dds_._Request_ import Request_
+
+using_state_name = LocoMode_wbc_fsm.name
 
 
 class MotionController:
@@ -70,7 +70,7 @@ class MotionController:
         self.fsm_controller = FSM()
         for mode in mode_list:
             self.fsm_controller.register(mode(self.kwargs))
-        self.fsm_controller.change(LocoModePt.name)
+        self.fsm_controller.change(using_state_name)
         
         # self.teleop = TeleopGamepad(self.fsm_controller, self.cfg, self.cfg.get("network_interface", ""))
         
