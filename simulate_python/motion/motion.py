@@ -21,7 +21,7 @@ from common.ctrlcomp import StateAndCmd, PolicyOutput
 from unitree_sdk2py.core.channel import ChannelPublisher, ChannelSubscriber, ChannelFactoryInitialize
 from unitree_sdk2py.idl.unitree_api.msg.dds_._Request_ import Request_
 
-using_state_name = LocoMode_wbc_fsm.name
+using_state_name = LocoMode.name
 
 
 class MotionController:

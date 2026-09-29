@@ -30,8 +30,8 @@ import termios
 import threading
 import time
 import tty
-from pathlib import Path
 
+# from pathlib import Path
 # SDK_ROOT = Path('~/unitree_sdk2_python').expanduser().resolve()
 # if str(SDK_ROOT) not in sys.path:
 #     sys.path.insert(0, str(SDK_ROOT))
@@ -116,8 +116,8 @@ def print_help():
     print("publish rate: 50 Hz")
 
 
-def print_status(vx, vy, vyaw):
-    sys.stdout.write(f"\r vx={vx:+.2f}  vy={vy:+.2f}  vyaw={vyaw:+.2f} ")
+def print_status(vx, vy, vyaw, ret):
+    sys.stdout.write(f"\r vx={vx:+.2f}  vy={vy:+.2f}  vyaw={vyaw:+.2f} ret={ret} ")
     sys.stdout.flush()
 
 
@@ -133,7 +133,7 @@ def main():
     ChannelFactoryInitialize(0, sys.argv[1])
 
     sport_client = SportClient()
-    sport_client.SetTimeout(0.5)
+    sport_client.SetTimeout(5.0)
     sport_client.Init()
 
     print_help()
@@ -166,8 +166,8 @@ def main():
             elif key in KEY_STOP:
                 vx, vy, vyaw = 0.0, 0.0, 0.0
 
-            sport_client.Move(vx, vy, vyaw)
-            print_status(vx, vy, vyaw)
+            ret = sport_client.Move(vx, vy, vyaw)
+            print_status(vx, vy, vyaw, ret)
 
             next_tick += PUBLISH_DT
             sleep_time = next_tick - time.monotonic()

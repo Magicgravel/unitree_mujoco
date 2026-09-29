@@ -1,8 +1,11 @@
 此项目主要来源于 [unitree_mujoco](https://github.com/unitreerobotics/unitree_mujoco)。在此基础上添加以下功能：
 
 - ✅ 添加键盘控制方式发遥控器指令（simulate_python/unitree_sdk2py_bridge.py 的 223-291 行）
+- 添加simulate_python/example
 - ✅ 添加motion参数，支持进行高层运动控制（simulate_python/motion 目录的代码）
+- 支持使用arm_sdk接口
 - 添加audio参数，支持PlayStream接口调用
+- ✅ 补充发布的low_state的mode_pr、mode_machine、tick字段（simulate_python/unitree_sdk2py_bridge.py 的 298 行部分）
 
 **键位映射表**
 

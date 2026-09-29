@@ -3,6 +3,7 @@ import numpy as np
 import pygame
 import sys
 import struct
+import time
 
 from unitree_sdk2py.core.channel import ChannelSubscriber, ChannelPublisher
 
@@ -30,6 +31,10 @@ TOPIC_WIRELESS_CONTROLLER = "rt/wirelesscontroller"
 MOTOR_SENSOR_NUM = 3
 NUM_MOTOR_IDL_GO = 20
 NUM_MOTOR_IDL_HG = 35
+
+class Mode:
+    PR = 0  # Series Control for Pitch/Roll Joints
+    AB = 1  # Parallel Control for A/B Joints
 
 class UnitreeSdk2Bridge:
 
@@ -290,6 +295,10 @@ class UnitreeSdk2Bridge:
                 self.low_state.wireless_remote[12:16] = packs[2]
                 self.low_state.wireless_remote[20:24] = packs[3]
 
+            self.low_state.mode_pr = Mode.PR
+            self.low_state.mode_machine = 5  # 29dof
+            self.low_state.tick = int(time.time() * 1000)
+            
             self.low_state_puber.Write(self.low_state)
 
     def PublishHighState(self):
