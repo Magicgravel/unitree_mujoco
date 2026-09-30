@@ -23,9 +23,6 @@ else:
     from unitree_sdk2py.idl.unitree_go.msg.dds_ import LowState_
     from unitree_sdk2py.idl.default import unitree_go_msg_dds__LowState_ as LowState_default
 
-from dds_wrapper.robots.g1.defines import ArmJoints
-
-TOPIC_ARM_SDK = "rt/arm_sdk"
 TOPIC_LOWCMD = "rt/lowcmd"
 TOPIC_LOWSTATE = "rt/lowstate"
 TOPIC_HIGHSTATE = "rt/sportmodestate"
@@ -98,9 +95,6 @@ class UnitreeSdk2Bridge:
 
         self.low_cmd_suber = ChannelSubscriber(TOPIC_LOWCMD, LowCmd_)
         self.low_cmd_suber.Init(self.LowCmdHandler, 10)
-        
-        self.arm_sdk_suber = ChannelSubscriber(TOPIC_ARM_SDK, LowCmd_)
-        self.arm_sdk_suber.Init(self.ArmSdkHandler, 10)
 
         # joystick
         self.key_map = {
@@ -121,22 +115,10 @@ class UnitreeSdk2Bridge:
             "down": 14,
             "left": 15,
         }
-    
-    def ArmSdkHandler(self, msg: LowCmd_):
-        if msg.motor_cmd[self.num_motor].q == 0.0:
-            self.enable_arm_sdk = False
-            return
-        if msg.motor_cmd[self.num_motor].q == 1.0:
-            self.enable_arm_sdk = True
-            self.update_mj_data_ctrl(msg, ArmJoints)
-    
-    def LowCmdHandler(self, msg: LowCmd_):
-        if not self.enable_arm_sdk:
-            self.update_mj_data_ctrl(msg, range(self.num_motor))
 
-    def update_mj_data_ctrl(self, msg: LowCmd_, joint_index):
+    def LowCmdHandler(self, msg: LowCmd_):
         if self.mj_data != None:
-            for i in joint_index:
+            for i in range(self.num_motor):
                 self.mj_data.ctrl[i] = (
                     msg.motor_cmd[i].tau
                     + msg.motor_cmd[i].kp
